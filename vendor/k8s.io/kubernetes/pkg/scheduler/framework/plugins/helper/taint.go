@@ -1,8 +1,5 @@
-//go:build !linux
-// +build !linux
-
 /*
-Copyright 2016 The Kubernetes Authors.
+Copyright 2022 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,13 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package volume
+package helper
 
-import (
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/kubernetes/pkg/volume/util/types"
-)
+import v1 "k8s.io/api/core/v1"
 
-func SetVolumeOwnership(mounter Mounter, dir string, fsGroup *int64, fsGroupChangePolicy *v1.PodFSGroupChangePolicy, completeFunc func(types.CompleteFuncParam)) error {
-	return nil
+// DoNotScheduleTaintsFilterFunc returns the filter function that can
+// filter out the node taints that reject scheduling Pod on a Node.
+func DoNotScheduleTaintsFilterFunc() func(t *v1.Taint) bool {
+	return func(t *v1.Taint) bool {
+		// PodToleratesNodeTaints is only interested in NoSchedule and NoExecute taints.
+		return t.Effect == v1.TaintEffectNoSchedule || t.Effect == v1.TaintEffectNoExecute
+	}
 }
